@@ -1,9 +1,9 @@
 import sys
-import ssl
 import asyncio
 
-from config import HOST, PORT, USERNAME, PASSWORD, SSL_CONTEXT
 from aiomqtt import Client
+
+from config import HOST, PORT, USERNAME, PASSWORD, SSL_CONTEXT, PUB_TOPIC, SUB_TOPIC
 
 
 if sys.platform == "win32":
@@ -11,7 +11,7 @@ if sys.platform == "win32":
 
 
 class MQTTRequests:
-    def __init__(self, device_id: int, pub_topic='devices/{0}/control', sub_topic='devices/{0}/response'):
+    def __init__(self, device_id: int, pub_topic=PUB_TOPIC, sub_topic=SUB_TOPIC):
         self.pub_topic = pub_topic.format(device_id)
         self.sub_topic = sub_topic.format(device_id)
         self.broker = HOST
