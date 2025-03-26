@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 import asyncio
 
@@ -6,9 +7,12 @@ from config import BOT_TOKEN, DEBUG
 from dispatcher import bot, dp
 
 from handlers.main import main_rt
-from services.requests import post_data
+from services.MQTT.requests import MQTTRequests
+
+
 # from data.models import init_db
 # from tests.db_tests import start_test
+
 
 
 def start_logging():
@@ -29,7 +33,6 @@ def setup_routers():
 
 async def main():
     setup_routers()
-    await post_data()
     # await start_test()
     # await init_db()
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
