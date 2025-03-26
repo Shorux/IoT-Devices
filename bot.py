@@ -1,13 +1,11 @@
 import os
-import sys
 import logging
 import asyncio
 
 from config import BOT_TOKEN, DEBUG
 from dispatcher import bot, dp
 
-from handlers.main import main_rt
-from services.MQTT.requests import MQTTRequests
+from modules.device_control.handlers.control import main_rt
 
 
 # from data.models import init_db
