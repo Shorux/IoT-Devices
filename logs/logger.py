@@ -24,11 +24,11 @@ class DeviceLog:
         return message
 
     def as_list(self) -> list[str]:
-        return self.log.split('\n')
+        return self.log.split('/')
 
     def _add(self, message: str) -> str:
         message = f'{datetime.now().strftime("%d.%m.%Y, %H:%M:%S")}: {self.device_name}{message}'
-        self.log += message + '\n'
+        self.log += message + '/'
         return message
 
     def __repr__(self):

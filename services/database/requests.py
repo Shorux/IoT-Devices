@@ -22,7 +22,7 @@ class DB:
 
     async def get(
             self, obj_id: int = None, sort_by: str = None,
-            where_statement: str = None, descend: bool = False,
+            where_statement = None, descend: bool = False,
     ):
         if obj_id:
             return await self._get_one(obj_id)

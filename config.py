@@ -2,6 +2,7 @@ import os
 import logging
 import ssl
 
+from aiogram.utils.chat_member import ADMINS
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,6 +10,7 @@ load_dotenv()
 DEBUG = bool(int(os.getenv('DEBUG', 0)))
 DATABASE_URL = os.getenv('DATABASE_URL')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+# ADMIN_ID = int(os.getenv('ADMIN_ID'))
 
 # Broker settings
 HOST = os.getenv('HOST')
