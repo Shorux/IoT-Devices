@@ -84,6 +84,8 @@ class DB:
         return device
 
     async def is_exists(self, obj_id: int = None) -> bool:
+        if not obj_id:
+            return False
         statement = select(self.model).where(self.where_model_id() == obj_id)
         result = await self.session.execute(statement)
         return result.scalar_one_or_none() is not None
@@ -114,4 +116,6 @@ class Orders(DB):
                      time: t, status: bool, device: Device=None, log: str=None) -> bool:
         order = Order(payment_name=payment_name, transaction_id=transaction_id, amount=amount,
                       date=date, time=time, status=status, device=device, log=log)
-        return await self._create(order, device.device_id)
+
+        device_id = device.device_id if device else None
+        return await self._create(order, device_id)
