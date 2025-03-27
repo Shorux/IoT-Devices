@@ -5,10 +5,14 @@ import asyncio
 from config import BOT_TOKEN, DEBUG
 from dispatcher import bot, dp
 
-from modules.device_control.handlers.control import main_rt
+from modules.device_control.handlers.control_devices import main_rt
+from services.MQTT.sub_requests import Listener
 
 
-# from data.models import init_db
+from services.database.engine import init_db, session
+from services.database.requests import Devices
+
+
 # from tests.db_tests import start_test
 
 
@@ -22,17 +26,25 @@ def start_logging():
         os.mkdir('logs')
     logging.basicConfig(
         filename=f'./logs/bot_{BOT_TOKEN.split(":")[0]}.log',
-        level=logging.WARNING,
-        format='~%(asctime)s %(message)s'
+        level=logging.INFO,
+        format='~%(asctime)s %(message)s',
+        encoding='utf-8'
     )
 
 def setup_routers():
     dp.include_router(main_rt)
 
+async def set_mqtt_listeners():
+    async with session:
+        devices = await Devices(session).get()
+        for device in devices:
+            asyncio.create_task(Listener().response(device.device_id))
+
 async def main():
     setup_routers()
     # await start_test()
-    # await init_db()
+    await init_db()
+    await set_mqtt_listeners()
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
