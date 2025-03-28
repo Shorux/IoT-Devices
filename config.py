@@ -2,7 +2,6 @@ import os
 import logging
 import ssl
 
-from aiogram.utils.chat_member import ADMINS
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,7 +9,7 @@ load_dotenv()
 DEBUG = bool(int(os.getenv('DEBUG', 0)))
 DATABASE_URL = os.getenv('DATABASE_URL')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-# ADMIN_ID = int(os.getenv('ADMIN_ID'))
+ADMINS_ID = list(map(int, os.getenv('ADMINS_ID').split(',')))
 
 # Broker settings
 HOST = os.getenv('HOST')
@@ -18,8 +17,6 @@ PORT = int(os.getenv('PORT'))
 USERNAME = os.getenv('USERNAME')
 PASSWORD = os.getenv('PASSWORD')
 SSL_CONTEXT = ssl.create_default_context()
-
-DEVICES = [1, 2]
 
 class TOPICS:
     # subscription topics

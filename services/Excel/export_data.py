@@ -1,18 +1,39 @@
+from io import BytesIO
+from turtledemo.penrose import start
+
 import pandas as pd
 
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from aiogram.types import BufferedInputFile, CallbackQuery
 
 from services.database.models import Order
 from services.database.requests import Orders
 from services.database.engine import session
 
 
-async def export_orders_to_excel(date: str, file_name: str = "orders_report.xlsx"):
-    date = datetime.strptime(date, "%Y-%m-%d").date()
+async def get_orders_excel(period, message):
+    today = datetime.today().date()
+
+    if period == "day":
+        start_date, end_date = today, today
+    elif period == "week":
+        start_date, end_date = today - timedelta(days=today.weekday()), today
+    elif period == "month":
+        start_date, end_date = today.replace(day=1), today
+    elif period == 'all':
+        start_date, end_date = None, None
+    else: return
 
     async with session:
-        orders = await Orders(session).get(where_statement=Order.date == date)
-        print(orders)
+        orders_db = Orders(session)
+        if period == 'all':
+            orders = await orders_db.get()
+        else:
+            orders = await orders_db.get(where=Order.date.between(start_date, end_date))
+
+        if not orders:
+            return None
 
     data = [
         {
@@ -21,7 +42,7 @@ async def export_orders_to_excel(date: str, file_name: str = "orders_report.xlsx
             "Сумма": order.amount,
             "Дата": order.date,
             "Время": order.time,
-            "Статус": "✅ Подтверждён" if order.status else "❌ Ожидание",
+            "Статус": "✅ Подтверждён" if order.status else "❌ Не подтверждён",
             "Лог": order.log,
             "Создано": order.created_at
         }
@@ -31,11 +52,11 @@ async def export_orders_to_excel(date: str, file_name: str = "orders_report.xlsx
 
     # Подсчёты
     total_orders = len(orders)
-    total_amount = sum(order.amount for order in orders if order.amount)
     confirmed_orders = sum(1 for order in orders if order.status)
+    total_amount = sum(order.amount for order in orders if order.amount)
 
-    # Создание Excel-файла с форматированием
-    with pd.ExcelWriter(file_name, engine='xlsxwriter') as writer:
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         workbook = writer.book
 
         # Страница с заказами
@@ -69,8 +90,8 @@ async def export_orders_to_excel(date: str, file_name: str = "orders_report.xlsx
         # Страница с итогами
         summary_data = {
             "Всего заказов": [total_orders],
-            "Общая сумма": [total_amount],
-            "Подтверждённые заказы": [confirmed_orders]
+            "Подтверждённые заказы": [confirmed_orders],
+            "Общая сумма": [total_amount]
         }
         df_summary = pd.DataFrame(summary_data)
         df_summary.to_excel(writer, sheet_name='Итог', index=False)
@@ -80,4 +101,12 @@ async def export_orders_to_excel(date: str, file_name: str = "orders_report.xlsx
         summary_ws.set_row(0, None, bold_format)
         summary_ws.set_column('B:B', 10, money_format)  # Общая сумма
 
-    print(f"Отчёт сохранён в {file_name}")
+    output.seek(0)
+
+    excel = BufferedInputFile(output.getvalue(), filename=f"{period}_orders.xlsx")
+
+    if excel:
+        await message.answer_document(excel)
+    else:
+        await message.answer('Нет данных')
+    await message.delete()

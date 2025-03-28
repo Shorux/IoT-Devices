@@ -1,12 +1,14 @@
 import os
 import logging
 import asyncio
+import pytz
+
+from datetime import datetime
 
 from config import BOT_TOKEN, DEBUG
 from dispatcher import bot, dp
-
+from modules.admin.handlers.admin import admin_rt
 from modules.device_control.handlers.control_devices import main_rt
-from services.Excel.export_data import export_orders_to_excel
 from services.MQTT.sub_requests import Listener
 
 
@@ -33,7 +35,12 @@ def start_logging():
     )
 
 def setup_routers():
+    dp.include_router(admin_rt)
     dp.include_router(main_rt)
+
+def setup_timezone():
+    pytz.timezone("Asia/Tashkent")
+    datetime.utcnow().replace(tzinfo=pytz.utc)
 
 async def set_mqtt_listeners():
     async with session:
@@ -45,9 +52,7 @@ async def main():
     setup_routers()
     # await start_test()
     await init_db()
-    # await export_orders_to_excel('2025-03-20')
     await set_mqtt_listeners()
-    # await bot.send_message(-1002617742941, 'test')
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 

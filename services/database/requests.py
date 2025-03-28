@@ -22,14 +22,14 @@ class DB:
 
     async def get(
             self, obj_id: int = None, sort_by: str = None,
-            where_statement = None, descend: bool = False,
+            where = None, descend: bool = False,
     ):
-        if obj_id:
+        if obj_id is not None:
             return await self._get_one(obj_id)
-        elif sort_by:
+        elif sort_by is not None:
             return await self._get_ordered_by(sort_by, descend)
-        elif where_statement:
-            return await self._get_where(where_statement)
+        elif where is not None:
+            return await self._get_where(where)
         else:
             return await self._get_all()
 
@@ -43,8 +43,8 @@ class DB:
         model_objs = (await self.session.execute(select(self.model))).scalars().all()
         return model_objs
 
-    async def _get_where(self, where_statement: str):
-        statement = select(self.model).where(text(where_statement))
+    async def _get_where(self, where_statement):
+        statement = select(self.model).where(where_statement)
 
         model_objs = (await self.session.execute(statement)).scalars().all()
         return model_objs
