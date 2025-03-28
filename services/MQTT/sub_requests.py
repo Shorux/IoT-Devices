@@ -15,7 +15,7 @@ class Listener(Client):
 
         topic = topic.format(device_id=device_id)
         async  for msg in self._subscribe(topic):
-            command = msg.payload.decode().strip('-')
+            command = msg.payload.decode().strip('-').strip('.')
             if command == "not_confirmed":
                 logging.info(f'Попытка включения реле без оплаты')
                 continue
