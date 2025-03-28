@@ -12,10 +12,16 @@ class Listener(Client):
     async def response(self, device_id, topic=TOPICS.response_sub):
         if not self._check_device_id(topic):
             return
+
         topic = topic.format(device_id=device_id)
         async  for msg in self._subscribe(topic):
             command = msg.payload.decode().strip('-')
-            logging.info(_.command_from_topic.format(topic=topic, command=command))
+            if command == "not_confirmed":
+                logging.info(f'Попытка включения реле без оплаты')
+                continue
+            else:
+                logging.info(_.command_from_topic.format(topic=topic, command=command))
+
             try:
                 command, transaction_id = command.split(',')
                 transaction_id = transaction_id.replace('ID:', '')
@@ -28,8 +34,6 @@ class Listener(Client):
                     log.info(f'Аппарат подтвердил получение команды и разрешил запуск на {duration} секунд')
                 elif command.startswith("confirmed"):
                     log.info(f'Аппарат подтвердил получение команды и разрешил запуск на 30 секунд')
-                elif command == "not_confirmed":
-                    log.info(f'Аппарат подтвердил получение команды и но не разрешил запуск')
                 elif command.startswith("relay") and "on" in command:
                     parts = command.split("on")
                     relay_index, duration = parts[0].replace("relay", ""), parts[1]
