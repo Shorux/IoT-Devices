@@ -1,5 +1,4 @@
 from io import BytesIO
-from turtledemo.penrose import start
 
 import pandas as pd
 
@@ -9,7 +8,7 @@ from aiogram.types import BufferedInputFile, CallbackQuery
 
 from services.database.models import Order
 from services.database.requests import Orders
-from services.database.engine import session
+from services.database.engine import async_session
 
 
 async def get_orders_excel(period, message):
@@ -25,7 +24,7 @@ async def get_orders_excel(period, message):
         start_date, end_date = None, None
     else: return
 
-    async with session:
+    async with async_session() as session:
         orders_db = Orders(session)
         if period == 'all':
             orders = await orders_db.get()

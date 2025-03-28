@@ -14,8 +14,6 @@ class Base(DeclarativeBase):
         table_name = self.__tablename__.capitalize().rstrip('s')
         return f'{table_name}<{self.pk}>'
 
-session = async_session()
-
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

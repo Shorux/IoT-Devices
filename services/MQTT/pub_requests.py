@@ -3,7 +3,7 @@ import sys
 import asyncio
 
 from .client import Client
-from config import TOPICS
+from utils.strings import TOPICS
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())

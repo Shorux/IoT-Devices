@@ -18,14 +18,6 @@ USERNAME = os.getenv('USERNAME')
 PASSWORD = os.getenv('PASSWORD')
 SSL_CONTEXT = ssl.create_default_context()
 
-class TOPICS:
-    # subscription topics
-    response_sub = 'devices/{device_id}/response'
-    new_device_sub = 'devices/new_device'
-
-    # publish topics
-    control_topic_pub = 'devices/{device_id}/control'
-
 if not BOT_TOKEN:
     logging.error("BOT_TOKEN is not defined neither in .env file nor in environment variables")
     quit()

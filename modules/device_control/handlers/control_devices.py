@@ -7,7 +7,7 @@ from filters.payment_type import IsClickChat
 from logs.logger import DeviceLog
 from services.MQTT.pub_requests import Publisher
 from modules.device_control.parsers import PaymentInfoParser
-from services.database.engine import session
+from services.database.engine import async_session
 from services.database.requests import Orders
 
 main_rt = Router(name='main')
@@ -34,14 +34,14 @@ async def handle_click_message(message: Message):
     if device:
         impulses = calculate(amount)
         if impulses:
-            command = f"PAYMENT_OK:{impulses-10}" if impulses > 10 else f"PAYMENT_OK"
+            command = f"PAYMENT_OK:{impulses-10},ID:{data.get('transaction_id')}" if impulses > 10 else f"PAYMENT_OK,ID:{data.get('transaction_id')}"
             await Publisher().command_to(device.device_id, command)
             log.info(f"Отправлена команда {command.strip()}")
             await message.reply(f"{device.device_id}: {command.strip()}")
         else:
             log.error(f"Сумма меньше 10 тыс. сум")
 
-    async with session:
+    async with async_session() as session:
         orders_db = Orders(session)
         await orders_db.create(
             payment_name=data.get("payment_name"),

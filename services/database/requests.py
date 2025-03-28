@@ -33,11 +33,10 @@ class DB:
         else:
             return await self._get_all()
 
-    async def _get_one(self, obj_id: int):
+    async def _get_one(self, obj_id):
         statement = select(self.model).where(self.where_model_id() == obj_id)
-        device = (await self.session.execute(statement)).scalar()
-
-        return device
+        model_obj = (await self.session.execute(statement)).scalar()
+        return model_obj
 
     async def _get_all(self):
         model_objs = (await self.session.execute(select(self.model))).scalars().all()
@@ -76,16 +75,17 @@ class DB:
         return await self._get_one(obj_id)
 
     async def delete(self, obj_id: int):
-        device = await self._get_one(obj_id)
+        model_obj = await self._get_one(obj_id)
 
         statement = delete(self.model).where(self.where_model_id() == obj_id)
         await self.session.execute(statement)
 
-        return device
+        return model_obj
 
-    async def is_exists(self, obj_id: int = None) -> bool:
+    async def is_exists(self, obj_id = None) -> bool:
         if not obj_id:
             return False
+
         statement = select(self.model).where(self.where_model_id() == obj_id)
         result = await self.session.execute(statement)
         return result.scalar_one_or_none() is not None
@@ -117,5 +117,4 @@ class Orders(DB):
         order = Order(payment_name=payment_name, transaction_id=transaction_id, amount=amount,
                       date=date, time=time, status=status, device=device, log=log)
 
-        device_id = device.device_id if device else None
-        return await self._create(order, device_id)
+        return await self._create(order, transaction_id)

@@ -3,7 +3,7 @@ import re
 
 from datetime import datetime
 
-from services.database.engine import session
+from services.database.engine import async_session
 from services.database.requests import Devices
 from logs.logger import DeviceLog
 
@@ -19,7 +19,6 @@ def is_valid_data(data: dict, log: DeviceLog) -> DeviceLog:
     log.info('Не хватает данных, команда не отправлена' if is_has_none else 'Все данные получены')
 
     return log
-
 
 class PaymentInfoParser:
     @staticmethod
@@ -47,14 +46,14 @@ class PaymentInfoParser:
             device_id=device_id,
         )
 
-        async with session:
+        async with async_session() as session:
             device = await Devices(session).get(device_id) if device_id else None
             if not device:
                 log.info(f'В списке нет устройства под id: {device_id}')
 
         data = {
             'device': device,
-            'transaction_id': int(order_id_match.group(1)) if order_id_match else None,
+            'transaction_id': order_id_match.group(1) if order_id_match else None,
             'amount': float(amount_match.group(1)) if amount_match else None,
             'time': time,
             'date': date,

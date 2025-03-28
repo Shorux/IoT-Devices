@@ -12,7 +12,7 @@ from modules.device_control.handlers.control_devices import main_rt
 from services.MQTT.sub_requests import Listener
 
 
-from services.database.engine import init_db, session
+from services.database.engine import init_db, async_session
 from services.database.requests import Devices
 
 
@@ -43,7 +43,7 @@ def setup_timezone():
     datetime.utcnow().replace(tzinfo=pytz.utc)
 
 async def set_mqtt_listeners():
-    async with session:
+    async with async_session() as session:
         devices = await Devices(session).get()
         for device in devices:
             asyncio.create_task(Listener().response(device.device_id))
