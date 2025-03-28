@@ -39,7 +39,11 @@ async def handle_click_message(message: Message):
     if device:
         impulses = calculate(amount)
         if impulses:
-            command = f"PAYMENT_OK:{impulses-10},ID:{data.get('transaction_id')}" if impulses > 10 else f"PAYMENT_OK,ID:{data.get('transaction_id')}"
+            if impulses > 10:
+                command = f"PAYMENT_OK:{impulses-10},ID:{data.get('transaction_id')}"
+            else:
+                command = f"PAYMENT_OK,ID:{data.get('transaction_id')}"
+
             await Publisher().command_to(device.device_id, command)
             log.info(f"Отправлена команда {command.strip()}")
             await message.reply(f"{device.device_id}: {command.strip()}")
