@@ -1,9 +1,6 @@
-from io import BytesIO
-
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
-from pandas import period_range
 
 from modules.admin.keyboards import report_kb
 from modules.admin.middlewares import AdminOnlyMiddleware
