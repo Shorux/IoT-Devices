@@ -35,7 +35,7 @@ class PaymentInfoParser:
         """
         device_match = re.search(r"Аппарат\s+(\d+)", text)
         order_id_match = re.search(r"🆔 (\d+)", text)
-        amount_match = re.search(r"🇺🇿 ([\d\.]+)", text)
+        amount_match = re.search(r"🇺🇿 ([\d,]+\.\d{2})", text)
         date_time_match = re.search(r"🕓 (\d{2}:\d{2}:\d{2}) (\d{2}\.\d{2}\.\d{4})", text)
         device_id = int(device_match.group(1)) if device_match else None
         date = datetime.strptime(date_time_match.group(2), '%d.%m.%Y')  if date_time_match else None
@@ -54,7 +54,7 @@ class PaymentInfoParser:
         data = {
             'device': device,
             'transaction_id': order_id_match.group(1) if order_id_match else None,
-            'amount': float(amount_match.group(1)) if amount_match else None,
+            'amount': float(amount_match.group(1).replace(',', '')) if amount_match else None,
             'time': time,
             'date': date,
             'status': text.split('\n')[-1][2:] == 'Успешно подтвержден',
