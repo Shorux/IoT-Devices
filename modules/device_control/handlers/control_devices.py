@@ -4,6 +4,7 @@ import math
 from aiogram import Router
 from aiogram.types import Message
 
+from dispatcher import default
 from filters.payment_type import IsClickChat
 from logs.logger import DeviceLog
 from services.MQTT.pub_requests import Publisher
@@ -18,16 +19,15 @@ def calculate(amount: float) -> int:
         return 0
     count = math.ceil(amount / 1000)
     return count
+@main_rt.channel_post()
+async def main(message):
+    print(message.text)
 
 @main_rt.message(IsClickChat())
 async def handle_click_message(message: Message):
     """
     Click payment system messages handler
     """
-    try:
-        await message.forward(-1002560974644)
-    except Exception as e:
-        logging.error(e)
     data = await PaymentInfoParser.click(message.text)
 
     log: DeviceLog = data.get('log')

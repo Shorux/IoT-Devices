@@ -11,7 +11,6 @@ from modules.admin.handlers.admin import admin_rt
 from modules.device_control.handlers.control_devices import main_rt
 from services.MQTT.sub_requests import Listener
 
-
 from services.database.engine import init_db, async_session
 from services.database.requests import Devices
 
