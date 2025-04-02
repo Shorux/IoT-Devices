@@ -19,8 +19,9 @@ def calculate(amount: float) -> int:
         return 0
     count = math.ceil(amount / 1000)
     return count
+
 @main_rt.channel_post()
-async def main(message):
+async def main(message: Message):
     print(message.text)
 
 @main_rt.message(IsClickChat())
